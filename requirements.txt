@@ -17,3 +17,6 @@ typing_extensions==4.13.2
 tzdata==2025.2
 urllib3==2.4.0
 cryptography
+dotenv
+python-dotenv
+matplotlib
