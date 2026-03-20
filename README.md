@@ -28,6 +28,10 @@ Cilj projekta je:
 Projekt je organiziran kroz sljedeće faze:
 1. **Eksplorativna analiza podataka (EDA)**  
 2. **Relacijski model (OLTP)**  
+<p align="center">
+  <img src="star_model.png" width="800"><br>
+  <em>Slika 1: Relacijski model</em>
+</p>
 3. **Dimenzijski model (Data Warehouse – star schema)**  
 4. **ETL proces (transformacija i učitavanje podataka)**  
 5. **Vizualizacija i analiza (BI)**  
@@ -47,6 +51,11 @@ Jedan zapis u tablici `fact_support_tickets` predstavlja **jedan helpdesk ticket
 - `dim_prioritet` – razina prioriteta ticketa  
 - `dim_status` – status ticketa  
 - `dim_vrijeme` – vremenska dimenzija  
+
+<p align="center">
+  <img src="star_model.png" width="800"><br>
+  <em>Slika 2: Dimenzijski Star model</em>
+</p>
 
 ### Fact tablica:
 - `fact_support_tickets` – sadrži metrike i strane ključeve prema dimenzijama  
