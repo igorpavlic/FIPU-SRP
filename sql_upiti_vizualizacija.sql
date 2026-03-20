@@ -15,8 +15,8 @@ SELECT
     p.naziv_projekta                          AS projekt,
     r.ime_prezime                             AS reporter,
     a.ime_prezime                             AS assignee,
-    ps.razina_prioriteta                      AS prioritet,
-    ps.naziv_statusa                          AS status,
+    pr.razina_prioriteta                      AS prioritet,
+    s.naziv_statusa                           AS status,
     f.vrijeme_key                             AS datum_kreiranja,
     v.dan,
     v.mjesec,
@@ -34,7 +34,8 @@ FROM fact_support_tickets f
 JOIN dim_projekt p          ON f.projekt_key = p.projekt_key
 JOIN dim_tehnicar r         ON f.reporter_key = r.tehnicar_key
 LEFT JOIN dim_tehnicar a    ON f.assignee_key = a.tehnicar_key
-JOIN dim_prioritet_status ps ON f.prioritet_status_key = ps.prioritet_status_key
+JOIN dim_prioritet pr       ON f.prioritet_key = pr.prioritet_key
+JOIN dim_status s           ON f.status_key = s.status_key
 JOIN dim_vrijeme v          ON f.vrijeme_key = v.vrijeme_key;
 
 
@@ -56,14 +57,14 @@ ORDER BY broj_ticketa DESC;
 -- ============================================================
 
 SELECT
-    ps.razina_prioriteta                              AS prioritet,
+    pr.razina_prioriteta                              AS prioritet,
     COUNT(*)                                          AS broj_ticketa,
     ROUND(AVG(f.vrijeme_rjesavanja_sati), 1)          AS avg_sati,
     ROUND(AVG(f.vrijeme_rjesavanja_sati) / 24, 1)     AS avg_dana
 FROM fact_support_tickets f
-JOIN dim_prioritet_status ps ON f.prioritet_status_key = ps.prioritet_status_key
+JOIN dim_prioritet pr ON f.prioritet_key = pr.prioritet_key
 WHERE f.vrijeme_rjesavanja_sati IS NOT NULL
-GROUP BY ps.razina_prioriteta
+GROUP BY pr.razina_prioriteta
 ORDER BY avg_sati DESC;
 
 
@@ -114,12 +115,12 @@ LIMIT 10;
 
 SELECT
     p.naziv_projekta   AS projekt,
-    ps.naziv_statusa   AS status,
+    s.naziv_statusa    AS status,
     COUNT(*)           AS broj_ticketa
 FROM fact_support_tickets f
 JOIN dim_projekt p          ON f.projekt_key = p.projekt_key
-JOIN dim_prioritet_status ps ON f.prioritet_status_key = ps.prioritet_status_key
-GROUP BY p.naziv_projekta, ps.naziv_statusa
+JOIN dim_status s ON f.status_key = s.status_key
+GROUP BY p.naziv_projekta, s.naziv_statusa
 ORDER BY p.naziv_projekta, broj_ticketa DESC;
 
 

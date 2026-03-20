@@ -73,7 +73,7 @@ ETL proces sastoji se od tri faze:
 
 ### 2. Transform
 - čišćenje podataka (null vrijednosti, outlieri)  
-- transformacija vremena (ms → sati)  
+- transformacija vremena (sekunde → sati)  
 - mapiranje kategorijskih vrijednosti u dimenzije  
 - generiranje surrogate ključeva  
 
@@ -88,16 +88,16 @@ ETL proces sastoji se od tri faze:
 
 Analiza je provedena na skupu podataka koji sadrži **66 691 ticket**.
 
-- Prosječno vrijeme rješavanja: **~18.3 sata**  
-- Medijan vremena rješavanja: **~49 minuta**  
-- Maksimalno vrijeme rješavanja: **~99 sati**  
+- Prosječno vrijeme rješavanja: **~18.441 sati (~768 dana)**  
+- Medijan vremena rješavanja: **~835 sati (~35 dana)**  
+- Maksimalno vrijeme rješavanja: **~99.220 sati (~4.134 dana)**  
 
 Velika razlika između prosjeka i medijana ukazuje na postojanje outliera.
 
-- Prosječan broj koraka: **3.21**  
-- Maksimalan broj koraka: **93**  
+- Prosječan broj koraka: **3.23**  
+- Maksimalan broj koraka: **57**  
 
-- Outlieri: **~5% ticketa**
+- Outlieri: **~5% ticketa** (iznad 95. percentila)
 
 ---
 
