@@ -29,7 +29,7 @@ Projekt je organiziran kroz sljedeće faze:
 1. **Eksplorativna analiza podataka (EDA)**  
 2. **Relacijski model (OLTP)**  
 <p align="center">
-  <img src="relation_model.png" width="800"><br>
+  <img src="Relation_model.png" width="800"><br>
   <em>Slika 1: Relacijski model</em>
 </p>
 3. **Dimenzijski model (Data Warehouse – star schema)**  
