@@ -1,0 +1,10 @@
+{
+  "name": "Helpdesk",
+  "dataColors": [
+    "#6366F1", "#06B6D4", "#22C55E", "#F59E0B",
+    "#EF4444", "#EC4899", "#8B5CF6", "#14B8A6"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#1E1E2E",
+  "tableAccent": "#6366F1"
+}
