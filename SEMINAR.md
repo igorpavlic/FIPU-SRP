@@ -47,6 +47,7 @@ Senj, svibanj 2026.
    - 6.2. Dashboard #2 — Analiza outliera
    - 6.3. Dashboard #3 — Distribucija
    - 6.4. Dashboard #4 — Kvaliteta podataka
+   - 6.5. Dodatna analiza outliera u Pythonu
 7. Generalizacija rezultata
 8. Zaključak
 9. Literatura
@@ -93,7 +94,11 @@ Eksplorativna analiza otkrila je nekoliko ključnih karakteristika dataseta:
 
 **Tri segmenta ticketa:** Analiza je otkrila da dataset sadrži tri potpuno različite populacije: "ghost ticketi" (33%) — ticketi s jednim korakom, unknown prioritetom i bez assigneea, s medijanom rješavanja od 2.277 dana; aktivni ticketi s assigneeom (53%) — medijan 9 dana; i ostali (14%) — medijan 15 dana.
 
-*Slika 1: Rezultati eksplorativne analize*
+<p align="center">
+  <img src="slike/slika_01_eda.png" alt="Rezultati eksplorativne analize" width="620">
+</p>
+
+<p align="center"><em>Slika 1: Rezultati eksplorativne analize — NULL vrijednosti, kardinalnost i distribucije (1_analysis.ipynb)</em></p>
 
 ### 2.3. Predprocesiranje podataka
 
@@ -107,7 +112,11 @@ Predprocesiranje je provedeno u sljedećim koracima:
 
 4. **Podjela na trening i test skup:** Dataset je podijeljen na 80% za dizajn i implementaciju (53.353 redaka) i 20% za validaciju generalizacije (13.338 redaka) korištenjem fiksnog seeda (`random_state=1`) za reproducibilnost.
 
-*Slika 2: Rezultati predprocesiranja*
+<p align="center">
+  <img src="slike/slika_02_predprocesiranje.png" alt="Rezultati predprocesiranja" width="640">
+</p>
+
+<p align="center"><em>Slika 2: Predprocesiranje — uklanjanje 16 stupaca s >90% NULL i podjela 80/20 (2_preprocess.ipynb)</em></p>
 
 ---
 
@@ -126,7 +135,11 @@ Ključne karakteristike modela:
 - `assignee_fk` je nullable jer 46% ticketa nema dodijeljenu osobu
 - Svi lookup entiteti imaju INT primarni ključ i VARCHAR atribut
 
-*Slika 3: ER dijagram relacijskog modela*
+<p align="center">
+  <img src="slike/slika_03_er_dijagram.png" alt="ER dijagram relacijskog modela" width="900">
+</p>
+
+<p align="center"><em>Slika 3: Konceptualni ER dijagram — sedam entiteta s centralnom tablicom support_ticket</em></p>
 
 ### 3.3. Relacijski model baze podataka
 
@@ -143,7 +156,11 @@ Implementacija je provedena korištenjem Pythona (pandas + SQLAlchemy) s `python
 
 Import u bazu izvršen je s `to_sql(if_exists='replace', dtype=sql_dtypes, chunksize=5000)` za batch unos podataka.
 
-*Slika 4: Rezultat importa u MySQL — DESCRIBE support_tickets*
+<p align="center">
+  <img src="slike/slika_04_describe_mysql.png" alt="DESCRIBE support_tickets" width="820">
+</p>
+
+<p align="center"><em>Slika 4: Rezultat importa u MySQL — DESCRIBE support_tickets (42 stupca s eksplicitnim tipovima)</em></p>
 
 ### 3.5. Provjera podataka
 
@@ -176,12 +193,12 @@ Star shema sastoji se od 5 dimenzijskih tablica i 1 tablice činjenica:
 | Dimenzija | PK | Atributi | Redaka |
 |-----------|-----|---------|--------|
 | dim_tehnicar | tehnicar_key (INT AI) | ime_prezime | 100 |
-| dim_projekt_prioritet_status | projekt_prioritet_status_key (INT AI) | naziv_projekta, razina_prioriteta, naziv_statusa | ~330 |
+| dim_projekt_prioritet_status | projekt_prioritet_status_key (INT AI) | naziv_projekta, razina_prioriteta, naziv_statusa | 353 |
 | dim_tip_ticketa | tip_ticketa_key (INT AI) | naziv_tipa | 15 |
 | dim_rezolucija | rezolucija_key (INT AI) | naziv_rezolucije | 4 |
 | dim_vrijeme | vrijeme_key (DATE) | dan, mjesec, godina, kvartal, dan_u_tjednu | ~4.700 |
 
-`dim_projekt_prioritet_status` je junk dimenzija koja kombinira tri kategorijske varijable (projekt, prioritet, status) u jednu tablicu. Teoretski max je 15 × 7 × 15 = 1.575 kombinacija, ali samo ~330 stvarno postoji u podacima.
+`dim_projekt_prioritet_status` je junk dimenzija koja kombinira tri kategorijske varijable (projekt, prioritet, status) u jednu tablicu. Teoretski max je 15 × 7 × 15 = 1.575 kombinacija, ali samo 353 kombinacije stvarno postoje u podacima.
 
 `dim_tehnicar` se koristi dvostruko — kao reporter i kao assignee, pri čemu je assignee nullable (46% ticketa nema dodijeljenog tehničara).
 
@@ -209,7 +226,11 @@ DDL je implementiran korištenjem SQLAlchemy ORM-a s `declarative_base()` pristu
 
 **Surrogate key logika:** Sve dimenzije koriste surrogate ključeve (AUTO_INCREMENT INT) umjesto prirodnih ključeva iz izvornog sustava. Prednosti su stabilnost identifikatora, bolje performanse JOIN operacija i podrška za eventualnu historizaciju (SCD).
 
-*Slika 5: Star shema — ER dijagram dimenzijskog modela*
+<p align="center">
+  <img src="slike/slika_05_star_shema.png" alt="Star shema dimenzijskog modela" width="880">
+</p>
+
+<p align="center"><em>Slika 5: Star shema — 5 dimenzijskih tablica i tablica činjenica fact_support_tickets</em></p>
 
 ---
 
@@ -254,7 +275,11 @@ Ispravnost pretvorbe potvrđena je ručnom provjerom: ticket 11887 ima `wf_total
 
 **Mapiranje stranih ključeva:** Za svaku dimenziju proveden je merge (JOIN) između izvornih podataka i dimenzijskih tablica kako bi se prirodni ključevi zamijenili surrogate ključevima. Posebna pažnja posvećena je korištenju LEFT JOIN-a za assignee (46% NULL) i rezoluciju (1.3% NULL) kako ne bi došlo do gubitka redaka.
 
-*Slika 6: Rezultat ETL procesa — verifikacija broja redaka*
+<p align="center">
+  <img src="slike/slika_06_etl_verifikacija.png" alt="Verifikacija ETL procesa" width="700">
+</p>
+
+<p align="center"><em>Slika 6: Verifikacija ETL procesa — broj redaka u dimenzijama i fact tablici (6_ETL.ipynb)</em></p>
 
 ### 5.3. Učitavanje podataka
 
@@ -263,7 +288,7 @@ Učitavanje je provedeno u batch modu (`chunksize=5000`) s privremenim isključi
 | Tablica | Redaka |
 |---------|--------|
 | dim_tehnicar | 100 |
-| dim_projekt_prioritet_status | 330 |
+| dim_projekt_prioritet_status | 353 |
 | dim_tip_ticketa | 15 |
 | dim_rezolucija | 4 |
 | dim_vrijeme | ~4.700 |
@@ -288,17 +313,25 @@ Prva stranica prikazuje ukupne KPI-eve i pregled sustava:
 - **Top assigneei po volumenu:** Petra Marić (1,9K), Petar Marić (1,8K), Maja Kovačić (1,7K)
 - **Self-assigned ticketi:** Dodatno je prikazan pregled tehničara koji su sebi dodijelili tickete. Josip Marić vodi s 34 self-assigned ticketa, što može ukazivati na specifičan radni proces ili nedostatak delegacije unutar tima.
 
-*Slika 7: Dashboard — Pregled sustava*
+<p align="center">
+  <img src="slike/slika_07_dashboard_pregled.png" alt="Dashboard Pregled sustava" width="940">
+</p>
+
+<p align="center"><em>Slika 7: Power BI dashboard #1 — Pregled sustava (KPI-evi, projekti, trend, opterećenje tehničara)</em></p>
 
 ### 6.2. Dashboard #2 — Analiza outliera
 
 Outlieri su definirani kao ticketi iznad 95. percentila (6.499 sati ≈ 271 dan) među ticketima s poznatim prioritetom.
 
-- **Normal vs Outlier po projektu:** Udio outliera varira od 19% (Project Helios) do 45% (Project Orion). Project Titan i Project Nexus su bez outliera u prikazu što ukazuje na manji uzorak.
-- **Najgori slučajevi po prioritetu:** Unknown prioritet dostiže max od 99.221 sati (~11 godina), Blocker do 42.164 sati, Medium do 48.927 sati
+- **Prag i obuhvat:** Od 25.499 ticketa s poznatim prioritetom, 1.275 ticketa (5,0%) prelazi prag od 6.499 sati.
+- **Normal vs Outlier po projektu:** Udio outliera nije ravnomjerno raspoređen — najviše ih apsolutno ima Project Solaris, Project Phoenix i Project Helios, dok ih projekti s manjim volumenom (Titan, Nexus) imaju svega nekoliko.
 - **Workflow analiza po prioritetu:** Posebno se ističe kategorija Lowest prioriteta s prosječno 2.324 sata čekanja (waiting) — višestruko više od Blockera (256 sati). Ovo je kontraintuitivno i ukazuje da ticketi najnižeg prioriteta zapravo čekaju dulje nego kritični. Blocker ticketi imaju najveće prosječno vrijeme u stanju "open" (822 sata), dok Highest provodi najviše u "waiting" (378 sati).
 
-*Slika 8: Dashboard — Analiza outliera*
+<p align="center">
+  <img src="slike/slika_08_dashboard_outlieri.png" alt="Dashboard Analiza outliera" width="940">
+</p>
+
+<p align="center"><em>Slika 8: Power BI dashboard #2 — Analiza outliera (normal vs outlier, vrijeme i workflow po prioritetu)</em></p>
 
 ### 6.3. Dashboard #3 — Distribucija
 
@@ -307,7 +340,11 @@ Outlieri su definirani kao ticketi iznad 95. percentila (6.499 sati ≈ 271 dan)
 - **Distribucija po tipu ticketa:** Ticket dominira s 67,8% (36,17K), a ostali tipovi — Story, Service, HD Service, Task i Subtask — zajedno čine preostalih 32%.
 - **Distribucija po rezoluciji:** 92,94% ticketa je riješeno s "Done", dok 4,54% otpada na "(Blank)" — neriješene tickete — i 2,51% na "Won't Do".
 
-*Slika 9: Dashboard — Distribucija*
+<p align="center">
+  <img src="slike/slika_09_dashboard_distribucija.png" alt="Dashboard Distribucija" width="940">
+</p>
+
+<p align="center"><em>Slika 9: Power BI dashboard #3 — Distribucija (matrica projekt × prioritet, tip ticketa, rezolucija)</em></p>
 
 ### 6.4. Dashboard #4 — Kvaliteta podataka
 
@@ -318,7 +355,33 @@ Outlieri su definirani kao ticketi iznad 95. percentila (6.499 sati ≈ 271 dan)
 - **Segmentacija ticketa:** Ghost ticketi imaju prosječno ~50.000 sati rješavanja, aktivni ticketi s assigneeom ~1.000 sati, a ostali ~3.000 sati. Ova segmentacija objašnjava zašto ukupni prosjek (18.441 sati) toliko odstupa od medijana (835 sati).
 - **Distribucija prioriteta:** 50,9% ticketa ima poznat prioritet, 49,1% je "unknown" — gotovo jednaka podjela koja sugerira sustavni propust u procesu kategorizacije ticketa.
 
-*Slika 10: Dashboard — Kvaliteta podataka*
+<p align="center">
+  <img src="slike/slika_10_dashboard_kvaliteta.png" alt="Dashboard Kvaliteta podataka" width="940">
+</p>
+
+<p align="center"><em>Slika 10: Power BI dashboard #4 — Kvaliteta podataka i segmentacija ticketa</em></p>
+
+
+### 6.5. Dodatna analiza outliera u Pythonu
+
+Uz Power BI dashboarde, detaljna analiza outliera provedena je i u Pythonu (`7_visualization.ipynb`, poglavlje 7.9) izravno nad star shemom pomoću SQL upita. Analiza pokazuje **gdje** outlieri troše vrijeme:
+
+- Outlieri provode u stanju `open` prosječno 94,5 puta više vremena od normalnih ticketa, u `in_progress` 29,1 puta, a u `waiting` 11,7 puta.
+- Najveći apsolutni doprinos ima stanje `open` (11.900 sati prosječno) — ticketi ne kasne zbog aktivnog rada, nego zato što nikad nisu ni preuzeti.
+
+<p align="center">
+  <img src="slike/slika_11_outlieri_workflow.png" alt="Workflow vrijeme outliera" width="820">
+</p>
+
+<p align="center"><em>Slika 11: Workflow vrijeme — normalni ticketi vs outlieri i faktor razlike po stanju</em></p>
+
+Heatmap projekt × prioritet pokazuje da su outlieri gotovo isključivo koncentrirani u `Medium` prioritetu, s najkritičnijim kombinacijama Project Solaris × Medium (184 outliera, prosjek 502 dana) i Project Phoenix × Medium (172 outliera, prosjek 1.078 dana).
+
+<p align="center">
+  <img src="slike/slika_12_outlieri_heatmap.png" alt="Heatmap outliera projekt x prioritet" width="620">
+</p>
+
+<p align="center"><em>Slika 12: Broj outliera po kombinaciji projekt × prioritet (7_visualization.ipynb)</em></p>
 
 ---
 
@@ -328,13 +391,27 @@ Kako bi se potvrdilo da uvidi iz analize nisu artefakt uzorkovanja, provedena je
 
 | Metrika | Trening (80%) | Test (20%) | Razlika |
 |---------|---------------|-----------|---------|
-| Avg resolve (h) | 18.441 | 18.652 | <2% |
-| Median resolve (h) | 835 | 848 | <2% |
-| % unknown prioritet | 51% | 51% | <1pp |
-| % bez assigneea | 46% | 47% | <1pp |
-| Ghost ticketi udio | 33% | 32% | <1pp |
-| Assignee efekt (faktor) | ~190x | ~190x | stabilan |
-| steps↔resolve korelacija | -0.46 | -0.46 | stabilan |
+| Avg resolve (h) | 18.441,0 | 18.648,6 | 1,1% |
+| Median resolve (h) | 834,9 | 857,3 | 2,7% |
+| Avg broj komentara | 8,7 | 8,4 | 3,4% |
+| Avg broj koraka | 3,2 | 3,2 | 1,9% |
+| % unknown prioritet | 50,9% | 51,0% | 0,3 pp |
+| % bez assigneea | 46,4% | 47,1% | 0,7 pp |
+| Ghost ticketi udio | 32,3% | 33,2% | 0,9 pp |
+| Assignee efekt (faktor) | 186x | 203x | stabilan (~190x) |
+| steps↔resolve korelacija | -0,463 | -0,464 | stabilan |
+
+<p align="center">
+  <img src="slike/slika_13_generalizacija.png" alt="Usporedba trening i test skupa" width="620">
+</p>
+
+<p align="center"><em>Slika 13: Usporedba trening (80%) i test (20%) skupa — distribucija prioriteta i median vrijeme rješavanja</em></p>
+
+<p align="center">
+  <img src="slike/slika_14_validacija_uvida.png" alt="Validacija kljucnih uvida" width="700">
+</p>
+
+<p align="center"><em>Slika 14: Validacija ključnih uvida na test skupu (8_generalization.ipynb)</em></p>
 
 Svi ključni uvidi potvrđeni su na test skupu s razlikama manjim od 5%. Jedina nestabilnost uočena je u kategorijama s malim uzorcima (Blocker: n≈525, Low: n≈560) gdje su medijani odstupali do 30% — što je očekivano za tako male uzorke.
 
@@ -366,9 +443,9 @@ Rezultati omogućuju optimizaciju helpdesk procesa kroz smanjenje udjela unknown
 
 ## 9. Literatura
 
-[1] Kimball, R., Ross, M. (2013). *The Data Warehouse Toolkit: The Definitive Guide to Dimensional Modeling*, 3rd Edition. Wiley.
+[1] Oreški, G. *srp_fipu — Projekt iz kolegija Skladišta i rudarenje podataka*, Fakultet informatike u Puli. GitHub repozitorij: https://github.com/goreski/srp_fipu
 
-[2] Inmon, W.H. (2005). *Building the Data Warehouse*, 4th Edition. Wiley.
+[2] Oreški, G. *Materijali s predavanja i vježbi kolegija Skladišta i rudarenje podataka*, Fakultet informatike u Puli.
 
 [3] Dokumentacija dataseta — FEATURES.md (priloženo uz dataset)
 
